@@ -4,8 +4,9 @@ import sqlite3, math
 import numpy as np
 # Needed for OS X for some reason
 import matplotlib
-matplotlib.use("TkAgg")
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from Utils import DATABASE_PATH
 
 months = ["", "Jan", "Feb", "Mar", "Apr", "May", "June", "July", "Aug", "Sept", "Oct", "Nov", "Dec"]
 
@@ -19,6 +20,8 @@ def getMax(a):
             maximum = x[0] + x[1]
     return roundup(maximum)
 
+# Val is a tuple which determines what to modify
+# (ban # change, warn # change)
 def updateCache(sqlconn, staff, val, date):
     formatDate = "{}-{}".format(date.split('-')[0], date.split('-')[1])
 
@@ -49,7 +52,7 @@ def updateCache(sqlconn, staff, val, date):
 
 def genUserPlot():
     plt.clf()
-    sqlconn = sqlite3.connect('sdv.db')
+    sqlconn = sqlite3.connect(DATABASE_PATH)
     data = sqlconn.execute("SELECT * FROM staffLogs").fetchall()
     staffData = {x[0]: [x[1], x[2]] for x in data}
     sqlconn.close()
@@ -66,7 +69,7 @@ def genUserPlot():
     p2 = plt.bar(ind, warns, width, bottom=bans, zorder=5)
     plt.ylabel("Logs")
     plt.xlabel("User")
-    plt.title("SDV Warns/Bans per User")
+    plt.title("Warns/Bans per User")
     plt.xticks(ind, sortedTotals)
     plt.xticks(rotation=-90)
     plt.yticks(np.arange(0, getMax(list(staffData.values())), 10))
@@ -74,12 +77,12 @@ def genUserPlot():
     plt.tight_layout()
     plt.grid(True, axis="y")
 
-    plt.savefig("sdv_user_plot.png")
+    plt.savefig("private/user_plot.png")
 
 # A lot of code could be reused if I wanted to combine these functions
 def genMonthlyPlot():
     plt.clf()
-    sqlconn = sqlite3.connect("sdv.db")
+    sqlconn = sqlite3.connect(DATABASE_PATH)
     data = sqlconn.execute("SELECT * FROM monthLogs").fetchall()
     sortedData = sorted(data)
     monthData = {x[0]: [x[1], x[2]] for x in sortedData}
@@ -96,7 +99,7 @@ def genMonthlyPlot():
     p2 = plt.bar(ind, warns, width, bottom=bans, zorder=5)
     plt.ylabel("Logs")
     plt.xlabel("Month")
-    plt.title("SDV Warns/Bans per Month")
+    plt.title("Warns/Bans per Month")
     plt.xticks(ind, labels)
     plt.xticks(rotation=-90)
     plt.yticks(np.arange(0, getMax(list(monthData.values())), 10))
@@ -104,4 +107,4 @@ def genMonthlyPlot():
     plt.tight_layout()
     plt.grid(True, axis="y")
 
-    plt.savefig("sdv_month_plot.png")
+    plt.savefig("private/month_plot.png")

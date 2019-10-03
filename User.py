@@ -1,5 +1,6 @@
 import discord, sqlite3
 import Utils
+from Utils import DATABASE_PATH
 
 class User:
     class MessageError(Exception):
@@ -32,7 +33,11 @@ class User:
             raise self.MessageError("Couldn't understand message.")
 
     def getMember(self):
-        return discord.utils.get(self.message.server.members, id=self.id)
+        u = [x for x in self.message.guild.members if x.id == int(self.id)]
+        if len(u) == 0:
+            return None
+        else:
+            return u[0]
 
     def getName(self, banList):
         member = self.getMember()
@@ -46,8 +51,8 @@ class User:
         return checkDatabase[-1][0]
 
     def search(self):
-        sqlconn = sqlite3.connect('sdv.db')
-        searchResults = sqlconn.execute("SELECT username, num, date, message, staff FROM badeggs WHERE id=?", [self.id]).fetchall()
+        sqlconn = sqlite3.connect(DATABASE_PATH)
+        searchResults = sqlconn.execute("SELECT username, num, date, message, staff, dbid FROM badeggs WHERE id=?", [self.id]).fetchall()
         sqlconn.commit()
         sqlconn.close()
 

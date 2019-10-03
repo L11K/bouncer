@@ -2,6 +2,13 @@
 
 import discord, time, sqlite3
 
+DATABASE_PATH = "private/sdv.db"
+
+# Removes the first word of a string
+def strip(m):
+    tmp = m.split(" ")[1:]
+    return " ".join(tmp)
+
 # Removes the '$command' to get just the request
 def removeCommand(m):
     tmp = m.split(" ")[2:]
@@ -25,13 +32,16 @@ def formatTime(t):
 
 # Checks if given user has one of the roles specified in config.json
 def checkRoles(user, validRoles):
-    if len(validRoles) == 1 and validRoles[0] == "":
-        return True
-    for role in user.roles:
-        for r in validRoles:
-            if role.id == r:
-                return True
-    return False
+    try:
+        if len(validRoles) == 1 and validRoles[0] == "":
+            return True
+        for role in user.roles:
+            for r in validRoles:
+                if role.id == r:
+                    return True
+        return False
+    except AttributeError as e:
+        print("The user {}#{} had this issue {}".format(user.name, user.discriminator, e))
 
 # Parses the message to check if there's a valid username, then attempts to find their ID
 def parseUsername(message, recentBans):
@@ -51,7 +61,7 @@ def parseUsername(message, recentBans):
         discriminator = user[1].split(" ")
         user = "{}#{}".format(user[0], discriminator[0])
 
-        userFound = discord.utils.get(message.server.members, name=user.split("#")[0], discriminator=user.split("#")[1])
+        userFound = discord.utils.get(message.guild.members, name=user.split("#")[0], discriminator=user.split("#")[1])
         if userFound != None:
             return userFound.id
 
@@ -59,7 +69,7 @@ def parseUsername(message, recentBans):
             revBans = {v: k for k, v in recentBans.items()}
             return revBans[user]
 
-        sqlconn = sqlite3.connect('sdv.db')
+        sqlconn = sqlite3.connect(DATABASE_PATH)
         searchResults = sqlconn.execute("SELECT id FROM badeggs WHERE username=?", [user]).fetchall()
         sqlconn.close()
         if searchResults != []:
@@ -82,21 +92,23 @@ def parseMessage(message, username):
 #########################################################
 
 # Exports the user list to a .txt file
-def fetchUserList():
-    with open("users.txt", 'w') as f:
-        mems = message.server.members
+async def fetchUserList(message):
+    with open("private/users.txt", 'w') as f:
+        mems = message.guild.members
         for u in mems:
             f.write("{}\n".format(u.name))
 
 # Fetches a dict of the role names to ID values for the given server
 # serverID needs to be a string
-def fetchRoleList(serverID, client):
-    s = client.get_server(serverID)
-    roles = {role.name: role.id for role in s.roles}
+async def fetchRoleList(server):
+    roles = {role.name: role.id for role in server.roles}
+    out = "```\n"
     for r in roles:
-        print("{} : {}".format(r, roles[r]))
+        out += "{} : {}\n".format(r, roles[r])
+    out += "```"
+    return out
 
-def dumpBans(banList):
+async def dumpBans(banList):
     output = ""
     for user in list(banList.items()):
         output += "{}: {}\n".format(user, banList[user])

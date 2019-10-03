@@ -42,7 +42,11 @@ The bot has several moderation features:
 - System logs
     - The bot will also monitor all channels and post server-wide changes in users.
     - These include nickname changes, joining, leaving, kicked, banned, joining/leaving VC, and logging of all deleted and modified messages.
+- Gatekeeping
+    - Users will be unable to speak until they react to a specified message with a specified emoji.
 
 There is also a `$help` command, which will give the syntax for all of the previously listed commands
 
-For better security, the bot only listens in specific channels for commands, and only accepts commands for users with specific roles. These can be specified, along with other parameters, in the `config.json` file. This is not included for obvious reasons, and a template is currently not stored due to the fact I am lazy.
+For better security, the bot only listens in specific channels for commands, and only accepts commands for users with specific roles. These can be specified, along with other parameters, in the `config.json` file, which is not included for obvious security reasons.
+
+If you wish to run the bot yourself, a rough guide on how to do so is located in `setup.md`.

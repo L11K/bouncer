@@ -1,14 +1,20 @@
 # Private files
 config.json
+private/*
 *.db
-*.csv
-DMs.txt
-*.png
 
 # Editor files
 *.swp
-.vscode
 *.code-workspace
+
+# Virtualenv stuff
+bin/*
+include/*
+lib/*
+local/*
+share/*
+.Python
+pip-selfcheck.json
 
 # Other junk
 .DS_Store
